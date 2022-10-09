@@ -38,6 +38,7 @@ namespace Note_8_Tool
             Process a = new Process();
             a.StartInfo = info;
             a.Start();
+            a.WaitForExit();
             return a.StandardOutput.ReadToEnd();
         }
         private bool HasADBDevice()
@@ -184,6 +185,7 @@ namespace Note_8_Tool
             logs("Checking Devices : ", Color.Black);
             if (HasADBDevice())
             {
+                Invoke(new MethodInvoker(delegate () { progressBar1.Value = 0; }));
                 logs("Connected", Color.DarkGreen);
                 logs("\nReading Partition Database : ", Color.Black);
                 ReadBlockMap(Application.StartupPath + "\\Data\\BlockMap.xml");                
@@ -199,7 +201,7 @@ namespace Note_8_Tool
                         logs("FAIL!", Color.Red);
                     }
                     int v = (i / ptable.Rows.Count) * 100;
-                    progressBar1.Value = v;
+                    Invoke(new MethodInvoker(delegate () { progressBar1.Value = v; }));
                     Invoke(new MethodInvoker(delegate () { richTextBox1.ScrollToCaret(); }));
                 }
                 logs("\nWaiting for Fastboot : ", Color.Black);
@@ -221,7 +223,7 @@ namespace Note_8_Tool
                 else
                 {
                     logs("Not Found\nOpen cmd and type ", Color.Red);
-                    logs("fastboot flashing unlock", Color.RoyalBlue);
+                    logs("\nfastboot flashing unlock", Color.RoyalBlue);
                 }
             }
             else
@@ -276,6 +278,34 @@ namespace Note_8_Tool
             isBusy = false;
             Invoke(new MethodInvoker(delegate () { richTextBox1.ScrollToCaret(); }));
         }
+        private void Reset()
+        {
+            logs("Checking Device : ", Color.Black);
+            if (HasADBDevice())
+            {
+                logs("Connected", Color.DarkGreen);
+                DialogResult dr = MessageBox.Show("Do you want to format data?", "Format?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (dr == DialogResult.Yes)
+                {
+                    logs("\nFormatting Data : ", Color.Black);
+                    ADBProcess("format-data");
+                    logs("Done", Color.DarkGreen);
+                }
+                logs("\nResetting FRP : ", Color.Black);
+                if(ADBPush(Application.StartupPath+@"\Data\frp.bin", "/dev/block/mmcblk0p30"))
+                {
+                    logs("OKAY", Color.DarkGreen);
+                }
+                else
+                {
+                    logs("FAIL!", Color.Red);
+                }
+                logs("\nRebooting", Color.Black);
+                ADBProcess("reboot");
+            }
+            else { logs("Not Found", Color.Red); }
+            isBusy = false;
+        }
         #endregion
         #region Form Work
         private void logs(string text,Color color)
@@ -319,6 +349,41 @@ namespace Note_8_Tool
                 isBusy = true;
                 logs("Mi Account Bypass\n\n", Color.RoyalBlue);
                 Thread b = new Thread(MiAccount);
+                b.IsBackground = true;
+                b.Start();
+            }
+            else
+            {
+                MessageBox.Show("Thread is locked");
+            }
+        }
+        private void button3_Click(object sender, EventArgs e)
+        {
+            richTextBox1.Clear();
+            if (FastbootConnected())
+            {
+                if (FBtoEDL())
+                {
+                    logs("Device is now in EDL", Color.RoyalBlue);
+                }
+                else
+                {
+                    logs("Fail to switch", Color.Red);
+                }
+            }
+            else
+            {
+                logs("No Fastboot Device", Color.Red);
+            }
+        }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (!isBusy)
+            {
+                richTextBox1.Clear();
+                isBusy = true;
+                logs("Factory/FRP Reset\n\n", Color.RoyalBlue);
+                Thread b = new Thread(Reset);
                 b.IsBackground = true;
                 b.Start();
             }
