@@ -1,0 +1,28 @@
+﻿<?xml version="1.0"?>
+<data>
+	<sideload filename="switch_0.bin" block="/dev/block/mmcblk0p1"/>
+	<sideload filename="xbl_config_0.bin" block="/dev/block/mmcblk0p11"/>
+	<sideload filename="xbl_configbak_0.bin" block="/dev/block/mmcblk0p12"/>
+	<sideload filename="devcfg_0.bin" block="/dev/block/mmcblk0p13"/>
+	<sideload filename="devcfgbak_0.bin" block="/dev/block/mmcblk0p14"/>
+	<sideload filename="storsec_0.bin" block="/dev/block/mmcblk0p16"/>
+	<sideload fileanme="rpm_0.bin" block="/dev/block/mmcblk0p19"/>
+	<sideload filename="rpmbak_0.bin" block="/dev/block/mmcblk0p20"/>
+	<sideload filename="hyp_0.bin" block="/dev/block/mmcblk0p21"/>
+	<sideload filename="hypbak_0.bin" block="/dev/block/mmcblk0p22"/>
+	<sideload filename="keymaster_0.bin" block="/dev/block/mmcblk0p23"/>
+	<sideload filename="keymasterbak_0.bin" block="/dev/block/mmcblk0p24"/>
+	<sideload filename="cmnlib_0.bin" block="/dev/block/mmcblk0p25"/>
+	<sideload filename="cmnlib64_0.bin" block="/dev/block/mmcblk0p26"/>
+	<sideload filename="cmnlibbak_0.bin" block="/dev/block/mmcblk0p27"/>
+	<sideload filename="cmnlib64bak_0.bin" block="/dev/block/mmcblk0p28"/>
+	<sideload filename="keystore_0.bin" block="/dev/block/mmcblk0p29"/>
+	<sideload filename="abl_0.bin" block="/dev/block/mmcblk0p33"/>
+	<sideload filename="ablbak_0.bin" block="/dev/block/mmcblk0p34"/>
+	<sideload filename="ddr_0.bin" block="/dev/block/mmcblk0p35"/>
+	<sideload filename="xbl_0.bin" block="/dev/block/mmcblk0p49"/>
+	<sideload filename="xblbak_0.bin" block="/dev/block/mmcblk0p50"/>
+	<sideload filename="tz_0.bin" block="/dev/block/mmcblk0p51"/>
+	<sideload filename="tzbak_0.bin" block="/dev/block/mmcblk0p52"/>
+	<sideload filename="devinfo_0.bin" block="/dev/block/mmcblk0p57"/>
+</data>
