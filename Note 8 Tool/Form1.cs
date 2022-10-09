@@ -123,7 +123,15 @@ namespace Note_8_Tool
         private void SFKOutput(object sendingProcess, DataReceivedEventArgs outline)
         {
             if (!string.IsNullOrEmpty(outline.Data))
-            {                
+            {
+                if (outline.Data.Contains("%"))
+                {
+                    string[] p = outline.Data.Split('%');
+                    Invoke(new MethodInvoker(delegate
+                    {
+                        progressBar1.Value = int.Parse(p[0]);
+                    }));
+                }
                 if (outline.Data.Contains("change at offset"))
                 {
                     string[] p = outline.Data.Split(':');
@@ -131,7 +139,7 @@ namespace Note_8_Tool
                 }
                 if (outline.Data.Contains("1 files checked"))
                 {
-                    logs("\nSecurity Patched", Color.DarkGreen);
+                    logs("\nDone", Color.DarkGreen);
                 }
             }
         }
@@ -194,6 +202,27 @@ namespace Note_8_Tool
                     progressBar1.Value = v;
                     Invoke(new MethodInvoker(delegate () { richTextBox1.ScrollToCaret(); }));
                 }
+                logs("\nWaiting for Fastboot : ", Color.Black);
+                ADBProcess("reboot bootloader");                
+                Thread.Sleep(10000);
+                if (FastbootConnected())
+                {
+                    logs("Found", Color.DarkGreen);
+                    logs("\nUnlocking Bootloader : ", Color.Black);
+                    if (FastbootUnlock())
+                    {
+                        logs("OKAY\n\nBootloader Unlock Completed!", Color.DarkGreen);
+                    }
+                    else
+                    {
+                        logs("Fail!", Color.Red);
+                    }
+                }
+                else
+                {
+                    logs("Not Found\nOpen cmd and type ", Color.Red);
+                    logs("fastboot flashing unlock", Color.RoyalBlue);
+                }
             }
             else
             {
@@ -202,7 +231,53 @@ namespace Note_8_Tool
             isBusy = false;
             Invoke(new MethodInvoker(delegate () { richTextBox1.ScrollToCaret(); }));
         }
+        private void MiAccount()
+        {
+            logs("Cheking Devices : ", Color.Black);
+            if (HasADBDevice())
+            {
+                logs("Connected", Color.DarkGreen);
+                logs("\nReading Security : ", Color.Black);
+                if (ADBPull("/dev/block/bootdevice/by-name/modem", Application.StartupPath + "\\Data\\miacc.bin"))
+                {
+                    logs("OKAY", Color.DarkGreen);
+                    logs("\nPatching Security : ", Color.Black);
+                    SFK(Application.StartupPath+@"\Data'miacc.bin", "43415244415050", "4D415244415050");
+                    logs("\nWriting Security : ", Color.Black);
+                    if(ADBPush(Application.StartupPath+@"\Data\miacc.bin", "/dev/block/mmcblk0p80"))
+                    {
+                        logs("OKAY", Color.DarkGreen);
+                    }
+                    else
+                    {
+                        logs("FAIL!", Color.Red);
+                    }
+                    File.Delete(Application.StartupPath + @"\Data\miacc.bin");
+                    logs("\nResetting Mi Account : ", Color.Black);
+                    if (ADBPush(Application.StartupPath + @"\Data\persist.img", "/dev/block/mmcblk0p69"))
+                    {
+                        logs("OKAY", Color.DarkGreen);
+                    }
+                    else
+                    {
+                        logs("FAIL!", Color.Red);
+                    }
+                    logs("\nRebooting", Color.Black);
+                    ADBProcess("reboot");
+                }
+                else
+                {
+                    logs("FAIL!", Color.Red);
+                }
+            }
+            else{
+                logs("Not Found", Color.Red);
+            }
+            isBusy = false;
+            Invoke(new MethodInvoker(delegate () { richTextBox1.ScrollToCaret(); }));
+        }
         #endregion
+        #region Form Work
         private void logs(string text,Color color)
         {
             Invoke(new MethodInvoker(delegate () { richTextBox1.AppendText(text, color); }));
@@ -236,6 +311,23 @@ namespace Note_8_Tool
                 MessageBox.Show("Thread is locked");
             }
         }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (!isBusy)
+            {
+                richTextBox1.Clear();
+                isBusy = true;
+                logs("Mi Account Bypass\n\n", Color.RoyalBlue);
+                Thread b = new Thread(MiAccount);
+                b.IsBackground = true;
+                b.Start();
+            }
+            else
+            {
+                MessageBox.Show("Thread is locked");
+            }
+        }
+        #endregion        
     }
     public static class RichTextBoxExtension
     {
